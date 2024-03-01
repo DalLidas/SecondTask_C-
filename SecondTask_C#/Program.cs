@@ -16,11 +16,11 @@ namespace SecondTask_C_
         static void Main(string[] args)
         {
             List<double> arr = new List<double>();
-
+            String resultTable = "";
 
             БездарнаяФункция();
 
-            MainHandle(arr);
+            MainHandle(arr, ref resultTable);
 
             Console.ReadKey(true);
 

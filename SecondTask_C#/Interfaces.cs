@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using SortingMethods;
@@ -128,9 +129,90 @@ namespace Interfaces
         }
 
 
+        static public void DrawCompareMenu(List<double> arr)
+        {
+            String menuLabel = "DrawArrayEditMenu";
+            String keyBinds = "F1 - ArrayFill, F2 - ArrayEdit, F3 - SortCompare, F4 - LoadArray, F5 - SaveArray, Esc - Exit";
+            String description = "";
 
+            Console.Clear();
 
-        static public void MainHandle(List<double> arr)
+            DrawBorder("=");
+            Console.SetCursorPosition((Console.WindowWidth - menuLabel.Length) / 2, 0);
+            Console.WriteLine(menuLabel);
+
+            Console.SetCursorPosition((Console.WindowWidth - keyBinds.Length) / 2, 1);
+            Console.WriteLine(keyBinds);
+            DrawBorder("=");
+
+            Console.SetCursorPosition((Console.WindowWidth - description.Length) / 2, 3);
+            Console.WriteLine(description);
+            DrawBorder("=");
+
+            int i = 0;
+            arr.ForEach(x => Console.Write("Arr[" + ++i + "]: " + x + "; "));
+
+            Console.WriteLine();
+            DrawBorder("=");
+        }
+
+        
+        static public void DrawLoadMenu(List<double> arr)
+        {
+            String menuLabel = "LoadMenuMenu";
+            String keyBinds = "F1 - ArrayFill, F2 - ArrayEdit, F3 - SortCompare, F4 - LoadArray, F5 - SaveArray, Esc - Exit";
+            String description = "";
+
+            Console.Clear();
+
+            DrawBorder("=");
+            Console.SetCursorPosition((Console.WindowWidth - menuLabel.Length) / 2, 0);
+            Console.WriteLine(menuLabel);
+
+            Console.SetCursorPosition((Console.WindowWidth - keyBinds.Length) / 2, 1);
+            Console.WriteLine(keyBinds);
+            DrawBorder("=");
+
+            Console.SetCursorPosition((Console.WindowWidth - description.Length) / 2, 3);
+            Console.WriteLine(description);
+            DrawBorder("=");
+
+            int i = 0;
+            arr.ForEach(x => Console.Write("Arr[" + ++i + "]: " + x + "; "));
+
+            Console.WriteLine();
+            DrawBorder("=");
+        }
+
+        static public void DrawSaveMenu(List<double> arr)
+        {
+            String menuLabel = "SaveMenu";
+            String keyBinds = "F1 - ArrayFill, F2 - ArrayEdit, F3 - SortCompare, F4 - LoadArray, F5 - SaveArray, Esc - Exit";
+            String description = "";
+
+            Console.Clear();
+
+            DrawBorder("=");
+            Console.SetCursorPosition((Console.WindowWidth - menuLabel.Length) / 2, 0);
+            Console.WriteLine(menuLabel);
+
+            Console.SetCursorPosition((Console.WindowWidth - keyBinds.Length) / 2, 1);
+            Console.WriteLine(keyBinds);
+            DrawBorder("=");
+
+            Console.SetCursorPosition((Console.WindowWidth - description.Length) / 2, 3);
+            Console.WriteLine(description);
+            DrawBorder("=");
+
+            int i = 0;
+            arr.ForEach(x => Console.Write("Arr[" + ++i + "]: " + x + "; "));
+
+            Console.WriteLine();
+            DrawBorder("=");
+        }
+        
+
+        static public void MainHandle(List<double> arr, ref String resultTable)
         {
             Modes mod = Modes.ArrayFillMode;
 
@@ -147,15 +229,15 @@ namespace Interfaces
                         break;
 
                     case Modes.SortCompareMode:
-                        SortCompareHandle(arr, ref mod);
+                        SortCompareHandle(arr, ref mod, ref resultTable);
                         break;
 
                     case Modes.loadMode:
-                        
+                        LoadHandle(arr, ref mod);
                         break;
 
                     case Modes.saveMode:
-                       
+                        SaveHandle(arr, ref mod, ref resultTable);
                         break;
 
                     case Modes.exitMode:
@@ -430,72 +512,286 @@ namespace Interfaces
             }
         }
 
-
-        static public void SortCompareHandle(List<double> arr, ref Modes gMod)
+        
+        static public void SortCompareHandle(List<double> arr, ref Modes gMod, ref String resultTable)
         {
             String input = "";
-            int index = -1;
-            double num = double.NaN;
+            bool errFlag = false;
+            ConsoleKey lMod;
+
+            List<double> buff1 = new List<double>(arr);
+            List<double> buff2 = new List<double>(arr);
+            List<double> corector = new List<double>(arr);
+
+            ShekerSort shekerSort = new ShekerSort();
+            ShellSort shellSort = new ShellSort();
+            corector.Sort();
+
+            while (true)
+            {
+                DrawCompareMenu(arr);
+
+                Console.WriteLine("Array: ");
+                arr.ForEach(x => Console.Write(x + " "));
+
+                Console.WriteLine("\n\nExpected sorted array: ");
+                corector.ForEach(x => Console.Write(x + " "));
+
+                shekerSort.Sort(buff1);
+                
+                // Sort check
+                for (int i = 0; i < buff1.Count; i++)
+                {
+                    if (buff1[i] != corector[i])
+                    {
+                        errFlag = true;
+                        break;
+                    }
+                }
+
+                shellSort.Sort(buff2);
+
+                // Sort check
+                for (int i = 0; i < buff1.Count; i++)
+                {
+                    if (buff1[i] != corector[i])
+                    {
+                        errFlag = true;
+                        break;
+                    }
+                }
+
+                if (errFlag)
+                {
+                    errFlag = false;
+                    Console.WriteLine("\nSorting error");
+                    Console.ReadKey(true);
+                    continue;
+                }
+
+                Console.WriteLine("\n\nShekerResult: ");
+                buff1.ForEach(x => Console.Write(x + " "));
+                Console.WriteLine("\n\nShellResult: ");
+                buff2.ForEach(x => Console.Write(x + " "));
+
+                resultTable = SortCompareTable(shekerSort, shellSort);
+
+                Console.WriteLine('\n' + resultTable);
+
+                // Save expression
+                while (true)
+                {
+                    try
+                    {
+                        lMod = InputHandler(ref input, "Do you want save result of sort metrics? (Y/N): ");
+                        if (lMod != ConsoleKey.Enter) { gMod = KeyToMode(lMod); return; }
+                        if (input == "Y" || input == "y") { gMod = Modes.saveMode; return; }
+                        else if (input == "N" || input == "n") { break; }
+                        else { continue; }
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
+                }
+            }
+        }
+
+
+        static public String SortCompareTable(SortMetrics metrics1, SortMetrics metrics2)
+        {
+            String str0 = String.Format("|{0,13}|{1,13}|{2,13}|{3,13}|", "", "CompareCount", "SwapCount", "SortTime");
+            String str1 = String.Format("|{0,13}|{1,13}|{2,13}|{3,13}|", metrics1.GetName(), metrics1.GetCompareCount(), metrics1.GetSwapCount(), metrics1.GetSortTime());
+            String str2 = String.Format("|{0,13}|{1,13}|{2,13}|{3,13}|", metrics2.GetName(), metrics2.GetCompareCount(), metrics2.GetSwapCount(), metrics2.GetSortTime());
+
+            String resultTable = "";
+
+            for (int i = 0; i < str1.Length; i++)
+            {
+                if (i % 14 == 0)
+                {
+                    resultTable += "+";
+                }
+                else
+                {
+                    resultTable += "-";
+                }
+            }
+
+            resultTable += '\n';
+            resultTable += str0;
+            resultTable += '\n';
+
+            for (int i = 0; i < str1.Length; i++)
+            {
+                if (i % 14 == 0)
+                {
+                    resultTable += "+";
+                }
+                else
+                {
+                    resultTable += "-";
+                }
+            }
+
+            resultTable += '\n';
+            resultTable += str1;
+            resultTable += '\n';
+            resultTable += str2;
+            resultTable += '\n';
+
+            for (int i = 0; i < str1.Length; i++)
+            {
+                if (i % 14 == 0)
+                {
+                    resultTable += "+";
+                }
+                else
+                {
+                    resultTable += "-";
+                }
+            }
+
+            resultTable += '\n';
+
+            return resultTable;
+        }
+
+
+        static public void LoadHandle(List<double> arr, ref Modes gMod)
+        {
+            String input = "";
             ConsoleKey lMod;
 
             while (true)
             {
-                DrawArrayEditMenu(arr);
+                DrawLoadMenu(arr);
 
-                // Index enter
+                // File path enter
                 while (true)
                 {
                     try
                     {
-                        lMod = InputHandler(ref input, ("Index: "), new List<ConsoleKey> { ConsoleKey.F9 });
-                        if (lMod == ConsoleKey.F9) { arr.Clear(); gMod = Modes.ArrayFillMode; return; }
-                        else if (lMod != ConsoleKey.Enter) { gMod = KeyToMode(lMod); return; }
-
-                        index = Convert.ToInt32(input);
-
-                        if (index < 0) { throw new Exception("Index cant be negative. Try again\n"); }
-                        if (index == 0) { throw new Exception("Index cant zero. Try again\n"); }
-                        if (index > arr.Count) { throw new Exception("Index not in range. Try again\n"); }
+                        lMod = InputHandler(ref input, "File path: ");
+                        if (lMod != ConsoleKey.Enter) { gMod = KeyToMode(lMod); return; }
+                        if (!System.IO.File.Exists(input)) { throw new Exception("Not correct file path. Try again\n"); }
                     }
                     catch (Exception err)
                     {
-                        if (err.Message != "Index cant be negative. Try again\n" &&
-                            err.Message != "Index cant zero. Try again\n" &&
-                            err.Message != "Index not in range. Try again\n")
-                            
-                        {
-                            Console.WriteLine("Not a double number. Try again\n");
-                        }
-                        else
-                        {
-                            Console.WriteLine(err.Message);
-                        }
+                        Console.WriteLine(err.Message);
                         continue;
                     }
                     break;
                 }
 
-                // Num enter
+                
+                try
+                {
+                    // Read all string from file
+                    String[] fileData = System.IO.File.ReadAllLines(input);
+                    String str = fileData[1];
+                    arr.Clear();
+                    String buff = "";
+
+                    // Read num from string
+                    for (int i = 0; i < str.Length; ++i)
+                    {
+                        if (str[i] != ' ')
+                        {
+                            buff += str[i];
+                        }
+                        else
+                        {
+                            arr.Add(Convert.ToDouble(buff));
+                            buff = "";
+                        }
+                    }
+                    
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+            }
+        }
+
+
+        static public void SaveHandle(List<double> arr, ref Modes gMod, ref String resultTable)
+        {
+            String input = "";
+            ConsoleKey lMod;
+            List<double> corector = new List<double>(arr);
+            corector.Sort();
+
+            while (true)
+            {
+                DrawSaveMenu(arr);
+
+                if (resultTable != "")
+                {
+                    Console.WriteLine("Sorted array: ");
+                    corector.ForEach(x => Console.Write(x + " "));
+                }
+                Console.WriteLine('\n');
+
+                // File path enter
                 while (true)
                 {
                     try
                     {
-                        lMod = InputHandler(ref input, ("Number: "), new List<ConsoleKey> { ConsoleKey.F9 });
-                        if (lMod == ConsoleKey.F9) { arr.Clear(); gMod = Modes.ArrayFillMode; return; }
-                        else if (lMod != ConsoleKey.Enter) { gMod = KeyToMode(lMod); return; }
-
-                        num = Convert.ToDouble(input);
+                        lMod = InputHandler(ref input, "File path: ");
+                        if (lMod != ConsoleKey.Enter) { gMod = KeyToMode(lMod); return; }
+                        if (System.IO.File.Exists(input)) { throw new Exception("File alredy exist. Try again\n"); }
+                        if (!MaskFit(input)) { throw new Exception("Not correct file path. Try again\n"); }
                     }
-                    catch (Exception)
+                    catch (Exception err)
                     {
-                        Console.WriteLine("Not a double number. Try again\n");
+                        Console.WriteLine(err.Message);
                         continue;
                     }
                     break;
                 }
 
-                arr[index] = num;
+                try
+                {
+                    using (System.IO.StreamWriter fileStream = new System.IO.StreamWriter(input))
+                    {
+
+                        fileStream.WriteLine("Array:");
+                        for (int i = 0; i < arr.Count; ++i)
+                        {
+                            fileStream.Write(arr[i] + " ");
+                        }
+
+                        if (resultTable != "")
+                        {
+                            fileStream.WriteLine("\nSortedArray:");
+                            for (int i = 0; i < corector.Count; ++i)
+                            {
+                                fileStream.Write(corector[i] + " ");
+                            }
+                            fileStream.WriteLine('\n' + resultTable);
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Error while write to file. Try again\n");
+                    continue;
+                }
+
+
+                Console.WriteLine("All data saved");
+                Console.ReadKey(true);
             }
+        }
+
+
+        static public bool MaskFit(string filePath)
+        {
+            Regex mask = new Regex("((/./)?([cC][oO][nN]))|((/./)?([cC][oO][nN]\\.))|((/./)?([cC][oO][nN]\\.)(.*))");
+
+            return !mask.IsMatch(filePath);
         }
 
 
