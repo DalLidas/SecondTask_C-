@@ -9,8 +9,7 @@ using System.Threading.Tasks;
 
 namespace SortingMethods
 {
-
-    abstract class SortMetrics
+    public abstract  class SortMetrics
     {
         static readonly Stopwatch timer = new Stopwatch();
 
@@ -129,7 +128,7 @@ namespace SortingMethods
         }
     }
 
-    internal class ShellSort : SortMetrics
+    public class ShellSort : SortMetrics
     {
         public override String GetName() { 
             return "ShellSort"; 
@@ -159,7 +158,7 @@ namespace SortingMethods
         }
     }
 
-    internal class ShekerSort : SortMetrics
+    public class ShekerSort : SortMetrics
     {
         public override String GetName()
         {

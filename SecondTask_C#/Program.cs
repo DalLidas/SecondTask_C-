@@ -6,7 +6,7 @@ namespace SecondTask_C_
     {
         static public void БездарнаяФункция()
         {
-            String msg = "Creator: Mukhametov Danil 423 group version 2";
+            String msg = "Creator: Mukhametov Danil 423 group 2 Task version hard 6";
             Console.SetCursorPosition((Console.WindowWidth - msg.Length) / 2, (Console.WindowHeight - 1) / 2);
             Console.WriteLine(msg);
             Console.ReadKey(true);
